@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams, useNavigate } from "react-router";
 
+
 const Record = (props) => (
   <tr>
     <td>{props.record.name}</td>
@@ -22,7 +23,6 @@ const Record = (props) => (
 
 export default function RecordList() {
   const [records, setRecords] = useState([]);
-
   const [form, setForm] = useState({
     search: "",
     comment: "",
