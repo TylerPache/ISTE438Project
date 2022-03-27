@@ -43,6 +43,18 @@ recordRoutes.route("/record").get(function (req, res) {
     });
 });
 
+// This section will help you get a single record by id
+recordRoutes.route("/record/:id").get(function (req, res) {
+  let db_connect = dbo.getDb();
+  let myquery = { _id: ObjectId( req.params.id )};
+  db_connect
+      .collection("ParkData")
+      .findOne(myquery, function (err, result) {
+        if (err) throw err;
+        res.json(result);
+      });
+});
+
 
 // This section will help you get records by Facility name
 recordRoutes.route("/record/Facility/:Facility").get(function (req, res) {
@@ -100,9 +112,10 @@ recordRoutes.route("/record/Location/:lat&:long&:distance").get(function (req, r
 });
 
 // This section will help you update a record by id.
-recordRoutes.route("/comment/:Facility").post(function (req, response) {
+recordRoutes.route("/comment/:id").post(function (req, response) {
   let db_connect = dbo.getDb();
-  let myquery = { Facility: req.params.Facility };
+  let myquery = { _id: ObjectId( req.params.id )};
+  console.log("REQ.BODY: " + JSON.stringify(req.body));
   console.log(req.body.name, req.body.comment);
   let newvalues = {
     $push: {
@@ -114,7 +127,7 @@ recordRoutes.route("/comment/:Facility").post(function (req, response) {
   };
   db_connect
     .collection("ParkData")
-    .updateMany(myquery, newvalues, function (err, res) {
+    .updateOne(myquery, newvalues, function (err, res) {
       if (err) throw err;
       console.log("1 document updated");
       response.json(res);
@@ -129,7 +142,7 @@ recordRoutes.route("/record/image/:Facility").get(function (req, res) {
     let fileName = req.params.Facility.replace(/\s/g, "");
     let readstream = gfs.createReadStream({filename: fileName});
     readstream.on("error", function(err){
-        res.send("No image found with that title");
+        res.json({ message: "No image found with that title" });
     });
     readstream.pipe(res);
 });
