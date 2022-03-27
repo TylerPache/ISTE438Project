@@ -8,11 +8,15 @@ const recordRoutes = express.Router();
 
 // This will help us connect to the database
 const dbo = require("../db/conn");
+
 const bodyParser = require("body-parser");
+let Grid = require("gridfs-stream");
+const {mongo} = require("mongoose");
+Grid.mongo = mongo;
+
 
 // This help convert the id from string to ObjectId for the _id.
 const ObjectId = require("mongodb").ObjectId;
-
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
@@ -116,5 +120,19 @@ recordRoutes.route("/comment/:Facility").post(function (req, response) {
       response.json(res);
     });
 });
+
+
+// This section will return images if one exists
+recordRoutes.route("/record/image/:Facility").get(function (req, res) {
+    let db_connect = dbo.getDb();
+    let gfs = Grid(db_connect);
+    let fileName = req.params.Facility.replace(/\s/g, "");
+    let readstream = gfs.createReadStream({filename: fileName});
+    readstream.on("error", function(err){
+        res.send("No image found with that title");
+    });
+    readstream.pipe(res);
+});
+
 
 module.exports = recordRoutes;
